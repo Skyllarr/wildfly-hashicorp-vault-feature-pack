@@ -69,6 +69,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Required so forked embedded WildFly during build-feature-pack can resolve
+             org.wildfly.security.vault:wildfly-vault-subsystem from module.xml <artifact/> (not pulled by type=pom above). -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>wildfly-vault-subsystem</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
