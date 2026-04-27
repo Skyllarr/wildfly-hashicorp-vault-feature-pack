@@ -6,12 +6,14 @@ package org.wildfly.extension.hashicorp.vault;
 
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.SUBSYSTEM;
 
+import java.util.EnumSet;
 import java.util.regex.Pattern;
 
 import org.jboss.as.controller.Extension;
 import org.jboss.as.controller.ExtensionContext;
 import org.jboss.as.controller.ModelVersion;
 import org.jboss.as.controller.PathElement;
+import org.jboss.as.controller.PersistentResourceXMLDescriptionWriter;
 import org.jboss.as.controller.SubsystemModel;
 import org.jboss.as.controller.SubsystemRegistration;
 import org.jboss.as.version.Stability;
@@ -26,7 +28,7 @@ public final class VaultExtension implements Extension {
      * The name of our subsystem within the model.
      */
     static final String SUBSYSTEM_NAME = "hashicorp-vault";
-    private static final Stability FEATURE_STABILITY = Stability.COMMUNITY;
+    private static final Stability FEATURE_STABILITY = Stability.DEFAULT;
     static final ModelVersion CURRENT_MODEL_VERSION = ModelVersion.create(1, 0, 0);
 
     static final PathElement SUBSYSTEM_PATH = PathElement.pathElement(SUBSYSTEM, SUBSYSTEM_NAME);
@@ -70,7 +72,7 @@ public final class VaultExtension implements Extension {
     public void initialize(ExtensionContext context) {
         final SubsystemRegistration subsystem = context.registerSubsystem(SUBSYSTEM_NAME, CURRENT_MODEL_VERSION);
         subsystem.registerSubsystemModel(new VaultSubsystemDefinition());
-        subsystem.registerXMLElementWriter(VaultSubsystemParser_1_0.INSTANCE);
+        subsystem.registerXMLElementWriter(new PersistentResourceXMLDescriptionWriter(VaultSubsystemSchema.CURRENT.get(context.getStability())));
 
         VaultExpressionResolver vaultResolver = new VaultExpressionResolver();
         context.registerExpressionResolverExtension(() -> vaultResolver, VAULT_EXPRESSION_PATTERN, false);
@@ -78,7 +80,7 @@ public final class VaultExtension implements Extension {
     
     @Override
     public void initializeParsers(org.jboss.as.controller.parsing.ExtensionParsingContext context) {
-        context.setSubsystemXmlMapping(SUBSYSTEM_NAME, VaultSubsystemParser_1_0.NAMESPACE, VaultSubsystemParser_1_0.INSTANCE);
+        context.setSubsystemXmlMappings(SUBSYSTEM_NAME, EnumSet.allOf(VaultSubsystemSchema.class));
     }
     
     public static PathElement createPath(String name) {
